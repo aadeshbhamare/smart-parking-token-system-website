@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SmartPark</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(170deg, #FF9933, #FFFFFF, #138808);
+            --primary-accent: #FF9933; /* Saffron */
+            --secondary-accent: #138808; /* Green */
+            --danger-accent: #d93025; /* Red for the clear button */
+            --header-bg: #000080; /* Navy Blue */
+            --text-color: #333;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --header-text-color: #fff;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-gradient); background-attachment: fixed; color: var(--text-color); margin: 0; }
+        .header { background: var(--header-bg); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-accent); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .header .logo { font-family: "Montserrat", sans-serif; font-weight: bold; font-size: 1.5rem; color: var(--header-text-color); }
+        .container { max-width: 1400px; margin: 2rem auto; padding: 2rem; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); }
+        h1 { color: var(--header-bg); border-bottom: 2px solid var(--header-bg); padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* Updated controls for two buttons */
+        .controls { margin-bottom: 20px; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; font-size: 16px; }
+        .btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .btn i { margin-right: 8px; }
+        
+        /* Specific button styles */
+        #export-btn { background-color: var(--secondary-accent); color: #fff; }
+        #clear-btn { background-color: var(--danger-accent); color: #fff; }
+        #logout-btn { background-color: #fff; color: var(--header-bg); }
+        
+        .table-container { overflow-x: auto; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: var(--secondary-accent); color: #fff; }
+        tr:nth-of-type(even) { background-color: #f8f8f8; }
+    </style>
+</head>
+<body>
+
+    <script>
+        if (sessionStorage.getItem('userRole') !== 'admin') {
+            alert("Access Denied: You must be an admin to view this page.");
+            window.location.href = 'index.html';
+        }
+    </script>
+    
+    <header class="header">
+        <div class="logo">SmartPark Admin</div>
+        <a href="#" id="logout-btn" class="btn"><i class="fas fa-sign-out-alt"></i>Logout</a>
+    </header>
+
+    <div class="container">
+        <h1><i class="fas fa-book"></i> All Customer Bookings</h1>
+        <div class="controls">
+            <!-- Button 1: Only Exports -->
+            <button id="export-btn" class="btn"><i class="fas fa-file-excel"></i>Export to Excel (CSV)</button>
+            <!-- Button 2: Only Clears -->
+            <button id="clear-btn" class="btn"><i class="fas fa-trash-alt"></i>Clear All Data</button>
+        </div>
+        <div class="table-container">
+            <table id="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Booking Month</th>
+                        <th>Booking Date & Time</th>
+                        <th>Spot ID(s)</th>
+                        <th>Customer Name</th>
+                        <th>Mobile Number</th>
+                        <th>Vehicle Number</th>
+                        <th>Payment Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const bookingsTableBody = document.querySelector("#bookings-table tbody");
+        const exportBtn = document.getElementById('export-btn');
+        const clearBtn = document.getElementById('clear-btn');
+
+        function loadBookingData() {
+            const bookings = JSON.parse(localStorage.getItem('allSmartParkBookings')) || [];
+            bookingsTableBody.innerHTML = ''; 
+            
+            if (bookings.length === 0) {
+                bookingsTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">No new booking data found.</td></tr>`;
+                // Disable both buttons if no data
+                exportBtn.disabled = true;
+                clearBtn.disabled = true;
+                return;
+            }
+            
+            // Enable both buttons if data exists
+            exportBtn.disabled = false;
+            clearBtn.disabled = false;
+
+            bookings.forEach(booking => {
+                const entryDate = new Date(booking.entryTime);
+                const monthName = entryDate.toLocaleString('default', { month: 'long' });
+                const row = `
+                    <tr>
+                        <td>${monthName} ${entryDate.getFullYear()}</td>
+                        <td>${entryDate.toLocaleString()}</td>
+                        <td>${booking.bookedSpots}</td>
+                        <td>${booking.fullname}</td>
+                        <td>${booking.mobile}</td>
+                        <td>${booking.primaryVehicle}</td>
+                        <td>${booking.paymentMethod}</td>
+                    </tr>`;
+                bookingsTableBody.innerHTML += row;
+            });
+        }
+
+        /**
+         * NEW FUNCTION 1: Exports data to a CSV file. Does NOT clear data.
+         */
+        function exportToCSV() {
+            const bookings = JSON.parse(localStorage.getItem('allSmartParkBookings')) || [];
+            if (bookings.length === 0) {
+                alert("No data to export.");
+                return;
+            }
+
+            let csvContent = "Booking Month,Booking Date & Time,Spot IDs,Customer Name,Mobile,Vehicle Number,Payment Method\n";
+            bookings.forEach(booking => {
+                const entryDate = new Date(booking.entryTime);
+                const month = `${entryDate.toLocaleString('default', { month: 'long' })} ${entryDate.getFullYear()}`;
+                const row = [`"${month}"`, `"${entryDate.toLocaleString()}"`, `"${booking.bookedSpots}"`, `"${booking.fullname}"`, `"${booking.mobile}"`, `"${booking.primaryVehicle}"`, `"${booking.paymentMethod}"`].join(',');
+                csvContent += row + "\r\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
+            a.setAttribute("download", `SmartPark_Bookings_${currentMonthName}_${Date.now()}.csv`);
+            a.click();
+            alert("Data has been exported successfully.");
+        }
+        
+        /**
+         * NEW FUNCTION 2: Clears all booking data after confirmation.
+         */
+        function clearAllData() {
+            const isConfirmed = confirm("Are you sure you want to clear ALL booking data from the dashboard?\nThis action cannot be undone.");
+            
+            if (isConfirmed) {
+                localStorage.removeItem('allSmartParkBookings');
+                alert("All booking data has been cleared.");
+                loadBookingData(); // Reload the table to show it's empty
+            }
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', loadBookingData);
+        exportBtn.addEventListener('click', exportToCSV); // Connect to new export function
+        clearBtn.addEventListener('click', clearAllData); // Connect to new clear function
+        
+        document.getElementById('logout-btn').addEventListener('click', e => {
+            e.preventDefault();
+            sessionStorage.removeItem('userRole');
+            alert("You have been logged out.");
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
