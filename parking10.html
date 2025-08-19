@@ -49,7 +49,7 @@ header {
 
 /* 3. Logo: Larger font size for brand emphasis */
 .logo {
-    font-size: 1rem; /* Increased size */
+    font-size: 2rem; /* Increased size */
     font-weight: bold;
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -214,8 +214,11 @@ footer { background-color: var(--header-bg); padding: 2rem 1rem; border-top: 1px
     if (sessionStorage.getItem('userRole') !== 'customer') { window.location.href = 'index.html'; }
   </script>
   <header>
-     
-        <img src="logo.PNG" alt="SmartPark>
+    <div class="header-left">
+        <!-- This is your new logo image -->
+        <img src="logo.PNG" alt="SmartPark Logo" style="height: 50px;">
+        <div class="logo">SmartPark</div>
+    </div>
 <header style="justify-content: flex-start; gap: 14rem;">
     <nav><ul><li><a href="#dashboard-section" class="header-link">Dashboard </a></li><li>
         <a href="#" id="logout-btn">Logout</a></li></ul>
@@ -958,6 +961,7 @@ function disconnectWallet() {
 </body>
 
 </html>
+
 
 
 
