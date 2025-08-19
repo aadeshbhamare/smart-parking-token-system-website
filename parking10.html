@@ -214,9 +214,13 @@ footer { background-color: var(--header-bg); padding: 2rem 1rem; border-top: 1px
     if (sessionStorage.getItem('userRole') !== 'customer') { window.location.href = 'index.html'; }
   </script>
   <header>
-    <div class="logo">SmartPark</div>
-     <img src="logo.PNG" alt="SmartPark Logo" class="footer-img">
-    
+     <footer>
+    <div class="footer-logo-line">
+        <img src="13.png" alt="SmartPark Logo" class="footer-img">
+      <div class="footer-links">
+        <a href="#hero">HOME</a>
+    </div> 🚗 SmartPark
+    </div>
 <header style="justify-content: flex-start; gap: 14rem;">
     <nav><ul><li><a href="#dashboard-section" class="header-link">Dashboard </a></li><li>
         <a href="#" id="logout-btn">Logout</a></li></ul>
@@ -959,6 +963,7 @@ function disconnectWallet() {
 </body>
 
 </html>
+
 
 
 
